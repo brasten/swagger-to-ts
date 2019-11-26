@@ -1,5 +1,5 @@
 import * as prettier from 'prettier';
-import { Swagger2Options } from 'swagger-2';
+import { Swagger2Options } from './swagger-2';
 
 export interface Swagger3Schema {
   $ref?: string;
