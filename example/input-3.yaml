@@ -1,0 +1,1928 @@
+openapi: 3.0.0
+info:
+  title: Catalog API
+  description: 'Access Regions, Providers, Products and Plans'
+  version: "2.0-oas3"
+paths:
+  /regions/:
+    get:
+      summary: List all available regions
+      tags:
+        - Region
+      parameters:
+        - name: location
+          in: query
+          description: |
+            Filter results to only include the regions that have this location.
+          schema:
+            type: string
+            format: label
+            pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+        - name: platform
+          in: query
+          description: |
+            Filter results to only include the regions that are on this
+            platform.
+          schema:
+            type: string
+            format: label
+            pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+      responses:
+        '200':
+          description: A list of regions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - xInternalAuthRequired: []
+      summary: Add a new region
+      tags:
+        - Region
+      responses:
+        '201':
+          description: Complete region object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+        '400':
+          description: Invalid request provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Region already exists for that platform and location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegion'
+        description: Region create request
+        required: true
+  '/regions/{id}':
+    get:
+      summary: Get a Region by ID
+      parameters:
+        - name: id
+          in: path
+          description: >-
+            ID of the region to lookup, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Region
+      responses:
+        '200':
+          description: A region.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+        '400':
+          description: Provided Region ID is Invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Region could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /providers/:
+    get:
+      summary: List all available providers
+      tags:
+        - Provider
+      parameters:
+        - $ref: '#/components/parameters/LabelFilter'
+      responses:
+        '200':
+          description: A list of providers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Provider'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - xInternalAuthRequired: []
+      summary: Add a new provider
+      tags:
+        - Provider
+      responses:
+        '201':
+          description: Complete provider object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '400':
+          description: Invalid request provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Provider already exists with that label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProvider'
+        description: Provider create request
+        required: true
+  '/providers/{id}':
+    get:
+      summary: Get a provider by ID
+      parameters:
+        - name: id
+          in: path
+          description: >-
+            ID of the provider to lookup, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Provider
+      responses:
+        '200':
+          description: A provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '404':
+          description: Unknown provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      security:
+        - xInternalAuthRequired: []
+      summary: Update a provider
+      parameters:
+        - name: id
+          in: path
+          description: >-
+            ID of the provider to update, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Provider
+      responses:
+        '200':
+          description: Complete provider object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '400':
+          description: Invalid request provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Provider not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Provider already exists with that label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProvider'
+        description: Provider update request
+        required: true
+  /products/:
+    get:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+        - anonymous: []
+      summary: List all available products
+      parameters:
+        - name: provider_id
+          in: query
+          description: |
+            Base32 encoded 18 byte identifier of the provider that these
+            products must belong to.
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+        - $ref: '#/components/parameters/LabelFilter'
+        - name: tags
+          in: query
+          description: Return only products matching at least one of the tags.
+          style: form
+          schema:
+            type: array
+            items:
+              type: string
+              format: label
+              pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+      tags:
+        - Product
+      responses:
+        '200':
+          description: A product.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid provider_id supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+      summary: Add a new product
+      tags:
+        - Product
+      responses:
+        '201':
+          description: Complete product object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid request provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Product already exists with that label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProduct'
+        description: Product create request
+        required: true
+  /internal/products:
+    get:
+      security:
+        - tokenRequired: []
+        - anonymous: []
+      summary: Get products and associated information
+      parameters:
+        - name: provider_id
+          in: query
+          description: |
+            Base32 encoded 18 byte identifier of the provider that these
+            products must belong to.
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+        - $ref: '#/components/parameters/LabelFilter'
+        - name: tags
+          in: query
+          description: Return only products matching at least one of the tags.
+          style: form
+          schema:
+            type: array
+            items:
+              type: string
+              format: label
+              pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+        - name: include_plans
+          in: query
+          description: Return product listings without plan information
+          schema:
+            type: boolean
+            default: true
+      tags:
+        - Product
+      responses:
+        '200':
+          description: A product.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpandedProduct'
+        '400':
+          description: Invalid provider_id supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/products/{id}':
+    get:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+        - anonymous: []
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          description: |
+            ID of the product to lookup, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Product
+      responses:
+        '200':
+          description: A product.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid Product ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          description: |
+            ID of the product to lookup, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Product
+      responses:
+        '200':
+          description: Complete product object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid Product ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProduct'
+        description: Product update request
+        required: true
+  '/plans/{id}':
+    get:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+        - anonymous: []
+      summary: Get a plan by ID
+      parameters:
+        - name: id
+          in: path
+          description: |
+            ID of the plan to lookup, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Plan
+      responses:
+        '200':
+          description: A plan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpandedPlan'
+        '400':
+          description: Invalid Plan ID Provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Unknown plan error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+      summary: Update a plan
+      parameters:
+        - name: id
+          in: path
+          description: |
+            ID of the plan to lookup, stored as a base32 encoded 18 byte
+            identifier.
+          required: true
+          schema:
+            type: string
+            format: base32ID
+            pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      tags:
+        - Plan
+      responses:
+        '200':
+          description: Complete product plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '400':
+          description: Invalid Plan ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlan'
+        description: Plan update request
+        required: true
+  /plans/:
+    get:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+        - anonymous: []
+      summary: Get a list of plans.
+      parameters:
+        - name: product_id
+          in: query
+          description: Return the plans that are associated with this product.
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              format: base32ID
+              type: string
+        - $ref: '#/components/parameters/LabelFilter'
+      tags:
+        - Plan
+      responses:
+        '200':
+          description: A list of plans for the given product.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpandedPlan'
+        '400':
+          description: Invalid Parameters Provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Could not find product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - xInternalAuthRequired: []
+        - tokenRequired: []
+      summary: Add a new plan
+      tags:
+        - Plan
+      responses:
+        '201':
+          description: Complete plan object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '400':
+          description: Invalid request provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Plan already exists with that label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlan'
+        description: Plan create request
+        required: true
+servers:
+  - url: 'https://api.catalog.manifold.co/v1'
+components:
+  parameters:
+    LabelFilter:
+      name: label
+      in: query
+      description: |
+        Filter results to only include those that have this label.
+      schema:
+        type: string
+        format: label
+        pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+  securitySchemes:
+    tokenRequired:
+      type: apiKey
+      name: Authorization
+      in: header
+    xInternalAuthRequired:
+      x-manifold-audience: internal
+      type: apiKey
+      name: X-Internal-Auth
+      in: header
+    anonymous:
+      type: apiKey
+      name: Manifold-Anonymous
+      in: header
+  schemas:
+    ID:
+      type: string
+      description: A base32 encoded 18 byte identifier.
+      pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      format: base32ID
+      x-go-type:
+        type: ID
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+    OptionalID:
+      type: string
+      description: A base32 encoded 18 byte identifier.
+      pattern: '^[0-9abcdefghjkmnpqrtuvwxyz]{29}$'
+      format: base32ID
+      x-go-type:
+        type: ID
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+      nullable: true
+    Label:
+      type: string
+      description: 'A machine readable unique label, which is url safe.'
+      pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+      x-go-type:
+        type: Label
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+    OptionalLabel:
+      type: string
+      description: 'A machine readable unique label, which is url safe.'
+      pattern: '^[a-z0-9][a-z0-9\-\_]{1,128}$'
+      x-go-type:
+        type: Label
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+      nullable: true
+    FeatureValueLabel:
+      type: string
+      description: 'A machine readable unique label, which is url safe.'
+      pattern: '^[a-z0-9][a-z0-9-_\.]{1,128}$'
+      x-go-type:
+        type: FeatureValueLabel
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+    Location:
+      type: string
+      description: A location of where a potential resource can be provisioned.
+      pattern: '^[a-z0-9][a-z0-9\-]{1,128}$'
+    Platform:
+      type: string
+      description: A name of a platform which is used to provision resources.
+      pattern: '^[a-z0-9][a-z0-9\-]{1,128}$'
+    Name:
+      type: string
+      description: A name of an entity which is displayed to a human.
+      pattern: '^[a-zA-Z0-9][a-z0-9A-Z\. \-_]{2,128}$'
+      x-go-type:
+        type: Name
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+    OptionalName:
+      type: string
+      description: A name of an entity which is displayed to a human.
+      pattern: '^[a-zA-Z0-9][a-z0-9A-Z\. \-_]{2,128}$'
+      x-go-type:
+        type: Name
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+      nullable: true
+    LogoURL:
+      type: string
+      description: >
+        Logo used for Provider and Product listings.
+
+
+        Must be square (same width and height) and minimum 400px. Maximum of
+        800px.
+      format: url
+      pattern: '^https:\/\/cdn\.(?:stage\.)?manifold.co'
+    OptionalLogoURL:
+      type: string
+      description: >
+        Logo used for Provider and Product listings.
+
+
+        Must be square (same width and height) and minimum 400px. Maximum of
+        800px.
+      format: url
+      pattern: '^https:\/\/cdn\.(?:stage\.)?manifold.co'
+      nullable: true
+    RegionBody:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/Platform'
+        location:
+          $ref: '#/components/schemas/Location'
+        name:
+          type: string
+          nullable: false
+        priority:
+          type: number
+          multipleOf: 1
+          minimum: 0
+          maximum: 100
+          nullable: false
+      additionalProperties: false
+      required:
+        - platform
+        - location
+        - name
+        - priority
+    Region:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        type:
+          type: string
+          enum:
+            - region
+        version:
+          type: integer
+          enum:
+            - 1
+        body:
+          $ref: '#/components/schemas/RegionBody'
+      additionalProperties: false
+      required:
+        - id
+        - type
+        - version
+        - body
+    CreateRegion:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/RegionBody'
+      additionalProperties: false
+      required:
+        - body
+    ProviderBody:
+      type: object
+      properties:
+        team_id:
+          $ref: '#/components/schemas/ID'
+        label:
+          $ref: '#/components/schemas/Label'
+        name:
+          $ref: '#/components/schemas/Name'
+        logo_url:
+          $ref: '#/components/schemas/LogoURL'
+        support_email:
+          type: string
+          format: email
+        documentation_url:
+          type: string
+          format: url
+      additionalProperties: false
+      required:
+        - label
+        - name
+        - team_id
+    UpdateProviderBody:
+      type: object
+      properties:
+        team_id:
+          $ref: '#/components/schemas/OptionalID'
+        label:
+          $ref: '#/components/schemas/OptionalLabel'
+        name:
+          $ref: '#/components/schemas/OptionalName'
+        logo_url:
+          $ref: '#/components/schemas/OptionalLogoURL'
+        support_email:
+          type: string
+          format: email
+          nullable: true
+        documentation_url:
+          type: string
+          format: url
+          nullable: true
+      additionalProperties: false
+    Provider:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        version:
+          type: integer
+          enum:
+            - 1
+        type:
+          type: string
+          enum:
+            - provider
+        body:
+          $ref: '#/components/schemas/ProviderBody'
+      additionalProperties: false
+      required:
+        - id
+        - version
+        - type
+        - body
+    CreateProvider:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/ProviderBody'
+      additionalProperties: false
+      required:
+        - body
+    UpdateProvider:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        body:
+          $ref: '#/components/schemas/UpdateProviderBody'
+      additionalProperties: false
+      required:
+        - id
+        - body
+    UpdateProduct:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        body:
+          $ref: '#/components/schemas/UpdateProductBody'
+      additionalProperties: false
+      required:
+        - id
+        - body
+    UpdateProductBody:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          x-nullable: true
+        logo_url:
+          $ref: '#/components/schemas/LogoURL'
+          x-nullable: true
+        listing:
+          $ref: '#/components/schemas/ProductListing'
+          x-nullable: true
+        tagline:
+          description: |
+            140 character sentence positioning the product.
+          type: string
+          maxLength: 140
+          nullable: true
+        value_props:
+          description: A list of value propositions of the product.
+          type: array
+          items:
+            $ref: '#/components/schemas/ValueProp'
+          maxItems: 8
+          nullable: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductImageURL'
+          maxItems: 8
+          nullable: true
+        support_email:
+          type: string
+          format: email
+          nullable: true
+        documentation_url:
+          type: string
+          format: url
+          nullable: true
+        terms_url:
+          description: |
+            URL to this Product's Terms of Service. If provided is true, then
+            a url must be set. Otherwise, provided is false.
+          type: string
+          nullable: true
+        feature_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureType'
+          nullable: true
+        integration:
+          type: object
+          properties:
+            provisioning:
+              $ref: '#/components/schemas/ProductProvisioning'
+              x-nullable: true
+            base_url:
+              type: string
+              format: url
+              nullable: true
+            sso_url:
+              type: string
+              format: url
+              nullable: true
+            version:
+              type: string
+              enum:
+                - v1
+              nullable: true
+            features:
+              $ref: '#/components/schemas/ProductIntegrationFeatures'
+          additionalProperties: false
+          nullable: true
+        tags:
+          $ref: '#/components/schemas/ProductTags'
+      additionalProperties: false
+    UpdatePlan:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        body:
+          $ref: '#/components/schemas/UpdatePlanBody'
+      additionalProperties: false
+      required:
+        - id
+        - body
+    UpdatePlanBody:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        label:
+          $ref: '#/components/schemas/Label'
+        state:
+          $ref: '#/components/schemas/PlanState'
+        has_resize_constraints:
+          type: boolean
+          description: Used in conjuction with resizable_to to set or unset the list
+          nullable: true
+        resizable_to:
+          $ref: '#/components/schemas/PlanResizeList'
+        regions:
+          type: array
+          description: Array of Region IDs
+          items:
+            $ref: '#/components/schemas/ID'
+          nullable: true
+        features:
+          type: array
+          description: Array of Feature Values
+          items:
+            $ref: '#/components/schemas/FeatureValue'
+          nullable: true
+        trial_days:
+          type: integer
+          minimum: 0
+          description: |
+            The number of days a user gets as a free trial when subscribing to
+            this plan. Trials are valid only once per product; changing plans
+            or adding an additional subscription will not start a new trial.
+          nullable: true
+        cost:
+          type: integer
+          minimum: 0
+          description: Dollar value in cents
+          nullable: true
+      additionalProperties: false
+    FeatureType:
+      description: |
+        A feature type represents the different aspects of a product that are
+        offered, these features can manifest differently depending on the plan.
+      type: object
+      properties:
+        label:
+          $ref: '#/components/schemas/Label'
+        name:
+          $ref: '#/components/schemas/Name'
+        type:
+          type: string
+          enum:
+            - boolean
+            - string
+            - number
+        customizable:
+          type: boolean
+          default: false
+          description: >-
+            This sets whether or not the feature can be customized by a
+            consumer.
+          nullable: false
+        upgradable:
+          type: boolean
+          default: false
+          description: >
+            This sets whether or not the feature can be upgraded by the consumer
+            after the
+
+            resource has provisioned. Upgrading means setting a higher value or
+            selecting a
+
+            higher element in the list.
+          nullable: false
+        downgradable:
+          type: boolean
+          default: false
+          description: >
+            This sets whether or not the feature can be downgraded by the
+            consumer after the
+
+            resource has provisioned. Downgrading means setting a lower value or
+            selecting a
+
+            lower element in the list.
+          nullable: false
+        measurable:
+          type: boolean
+          default: false
+          description: |
+            Sets if this feature’s value is trackable from the provider,
+            this only really affects numeric constraints.
+          nullable: false
+        values:
+          $ref: '#/components/schemas/FeatureValuesList'
+      additionalProperties: false
+      required:
+        - label
+        - name
+        - type
+    FeatureValuesList:
+      type: array
+      description: |
+        A list of allowable values for the feature.
+        To define values for a boolean feature type, only `true` is required,
+        using the label `true`, name and numeric_details will be ignored.
+        If the feature is set measurable it is expected that these all have a
+        `numeric_details` definition, and the plan will determine which
+        `numeric_details` set is used based on it's setting.
+      items:
+        $ref: '#/components/schemas/FeatureValueDetails'
+      nullable: true
+    FeatureValueDetails:
+      type: object
+      properties:
+        label:
+          $ref: '#/components/schemas/FeatureValueLabel'
+        name:
+          $ref: '#/components/schemas/Name'
+        cost:
+          type: integer
+          minimum: 0
+          default: 0
+          description: |
+            The cost that will be added to the monthly plan cost when this value
+            is selected or is default for the plan.
+            Cost is deprecated in favor of the `price.cost` field.
+          nullable: false
+        price:
+          type: object
+          properties:
+            cost:
+              type: integer
+              minimum: 0
+              default: 0
+              description: >
+                Cost is the price in cents that will be added to plan's base
+                cost
+
+                when this value is selected or is default for the plan.
+
+                Number features should use the cost range instead.
+              nullable: false
+            multiply_factor:
+              type: number
+              minimum: 0
+              default: 0
+              description: |
+                When a feature is used to multiply the cost of the plan or of
+                another feature, multiply factor is used for calculation.
+                A feature cannot have both a cost and a multiply factor.
+              nullable: false
+            formula:
+              $ref: '#/components/schemas/PriceFormula'
+              description: |
+                Price describes how the feature cost should be calculated.
+              example:
+                feature_multiplies_base_cost: '(* plan#base_cost feature-a#multiply_factor)'
+                feature_multiplies_feature_cost: '(* feature-b#cost feature-a#multiply_factor)'
+                feature_multiplies_numeric_value: '(* feature-c#number feature-a#multiply_factor)'
+                feature_multiplies_total_cost: '(* plan#total_cost feature-a#multiply_factor)'
+                feature_nested_formulas: >-
+                  (+ (- (* feature-a#cost feature-b#multiply_factor) 500)
+                  plan#partial_cost)
+            description:
+              type: string
+              description: |
+                Description explains how a feature is calculated to the user.
+          description: |
+            Price describes the cost of a feature. It should be preferred over
+            the `cost` property.
+          additionalProperties: false
+        numeric_details:
+          $ref: '#/components/schemas/FeatureNumericDetails'
+      additionalProperties: false
+      required:
+        - label
+        - name
+    FeatureNumericDetails:
+      type: object
+      description: |
+        Optional container for additional details relating to numeric features.
+        This is required if the feature is measurable and numeric.
+      properties:
+        increment:
+          type: integer
+          minimum: 0
+          default: 1
+          description: >
+            Sets the increment at which numbers can be selected if customizable,
+            by
+
+            default this is 1; for example, setting this to 8 would only allow
+            integers
+
+            in increments of 8 ( 0, 8, 16, ... ). This property is not used if
+            the
+
+            feature is measurable; except if it is set to 0, setting the
+            increment to 0
+
+            means this numeric details has no scale, and will not be or
+            customizable.
+
+            Some plans may not have a measureable or customizable feature.
+          nullable: false
+        min:
+          type: integer
+          default: 0
+          minimum: 0
+          description: Minimum value that can be set by a user if customizable
+          nullable: false
+        max:
+          type: integer
+          minimum: 1
+          description: Maximum value that can be set by a user if customizable
+          nullable: true
+        suffix:
+          type: string
+          description: >-
+            Applied to the end of the number for display, for example the ‘GB’
+            in ‘20 GB’.
+          nullable: true
+        cost_ranges:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureNumericRange'
+          nullable: true
+      nullable: true
+    FeatureNumericRange:
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: -1
+          description: >
+            Defines the end of the range ( inclusive ), from the previous, or 0;
+
+            where the cost_multiple starts taking effect. If set to -1 this
+            defines the
+
+            range to infinity, or the maximum integer the system can handle
+
+            ( whichever comes first ).
+          nullable: false
+        cost_multiple:
+          type: integer
+          default: 0
+          minimum: 0
+          description: |
+            An integer in 10,000,000ths of cents, will be multiplied by the
+            numeric value set in the feature to determine the cost.
+          nullable: false
+    FeatureValue:
+      type: object
+      properties:
+        feature:
+          $ref: '#/components/schemas/Label'
+        value:
+          $ref: '#/components/schemas/FeatureValueLabel'
+      additionalProperties: false
+      required:
+        - feature
+        - value
+    ValueProp:
+      type: object
+      properties:
+        header:
+          description: Heading of a value proposition.
+          type: string
+          minLength: 3
+          maxLength: 80
+          nullable: false
+        body:
+          description: Body of a value proposition.
+          type: string
+          minLength: 10
+          maxLength: 500
+          nullable: false
+      additionalProperties: false
+      required:
+        - header
+        - body
+    ProductImageURL:
+      type: string
+      description: |
+        Image URL used for Product listings.
+
+        Minimum 660px wide, 400px high.
+      format: url
+      pattern: '^https:\/\/cdn\.(?:stage\.)?manifold.co'
+    ProductTags:
+      type: array
+      description: List of tags for product categorization and search
+      items:
+        $ref: '#/components/schemas/Label'
+    ProductState:
+      type: string
+      enum:
+        - available
+        - hidden
+        - grandfathered
+        - new
+        - upcoming
+    ProductListing:
+      type: object
+      properties:
+        public:
+          type: boolean
+          default: false
+          description: >
+            When true, everyone can see the product when requested. When false
+            it will
+
+            not be visible to anyone except those on the provider team.
+        listed:
+          type: boolean
+          default: false
+          description: >
+            When true, the product will be displayed in product listings
+            alongside
+
+            other products. When false the product will be excluded from
+            listings,
+
+            but can still be provisioned directly if it's label is known.
+
+            Any pages that display information about the product when not
+            listed,
+
+            should indicate to webcrawlers that the content should not be
+            indexed.
+        marketing:
+          type: object
+          description: >
+            Object to hold various flags for marketing purposes only. These are
+            values
+
+            that need to be stored, but should not affect decision making in
+            code. If
+
+            we find ourselves in a position where we think they should, we
+            should
+
+            consider refactoring our listing definition.
+          properties:
+            beta:
+              type: boolean
+              default: false
+              description: >
+                Indicates whether or not the product is in `Beta` and should be
+
+                advertised as such. This does not have any impact on who can
+                access the
+
+                product, it is just used to inform consumers through our
+                clients.
+            new:
+              type: boolean
+              default: false
+              description: >
+                Indicates whether or not the product is in `New` and should be
+
+                advertised as such. This does not have any impact on who can
+                access the
+
+                product, it is just used to inform consumers through our
+                clients.
+            featured:
+              type: boolean
+              default: false
+              description: >
+                Indicates whether or not the product is in `New` and should be
+
+                advertised as such. This does not have any impact on who can
+                access the
+
+                product, it is just used to inform consumers through our
+                clients.
+          additionalProperties: false
+          default: {}
+          x-go-type:
+            type: ProductListingMarketing
+            import:
+              package: github.com/manifoldco/marketplace/catalog/primitives/shims
+              alias: cShims
+      additionalProperties: false
+      default: {}
+      x-go-type:
+        type: ProductListing
+        import:
+          package: github.com/manifoldco/marketplace/catalog/primitives/shims
+          alias: cShims
+    ProductProvisioning:
+      type: string
+      enum:
+        - provider-only
+        - pre-order
+        - public
+      description: >
+        Provider Only, implies that the product should only be provisionable by
+        the
+          provider; so members of the provider team, no one else should be allowed.
+        Pre-Order, should not be used yet. But in the future it should allow
+        people to
+          pre-provision a resource for when it does go live.
+        Public, means the resource is live and everyone should be able to
+        provision it.
+    ProductIntegrationFeatures:
+      type: object
+      properties:
+        access_code:
+          description: >
+            Indicates whether or not this product supports resource transitions
+            to
+
+            manifold by access_code.
+          type: boolean
+          nullable: false
+        sso:
+          description: |
+            Represents whether or not this product supports Single
+            Sign On
+          type: boolean
+          nullable: false
+        plan_change:
+          description: |
+            Represents whether or not this product supports changing
+            the plan of a resource.
+          type: boolean
+          nullable: false
+        region:
+          description: |
+            Describes how the region for a resource is specified, if
+            unspecified, then regions have no impact on this
+            resource.
+          type: string
+          enum:
+            - user-specified
+            - unspecified
+      additionalProperties: false
+      default: {}
+      x-go-type:
+        type: ProductIntegrationFeatures
+        import:
+          package: github.com/manifoldco/marketplace/catalog/primitives/shims
+          alias: cShims
+    ProductBody:
+      type: object
+      properties:
+        provider_id:
+          $ref: '#/components/schemas/ID'
+        label:
+          $ref: '#/components/schemas/Label'
+          description: |
+            Product labels are globally unique and contain the provider name.
+        name:
+          $ref: '#/components/schemas/Name'
+        state:
+          $ref: '#/components/schemas/ProductState'
+        listing:
+          $ref: '#/components/schemas/ProductListing'
+        logo_url:
+          $ref: '#/components/schemas/LogoURL'
+        tagline:
+          description: |
+            140 character sentence positioning the product.
+          type: string
+          maxLength: 140
+          nullable: false
+        value_props:
+          description: A list of value propositions of the product.
+          type: array
+          items:
+            $ref: '#/components/schemas/ValueProp'
+          maxItems: 8
+          nullable: false
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductImageURL'
+          maxItems: 8
+          nullable: false
+        support_email:
+          type: string
+          format: email
+          nullable: false
+        documentation_url:
+          type: string
+          format: url
+        terms:
+          description: |
+            URL to this Product's Terms of Service. If provided is true, then
+            a url must be set. Otherwise, provided is false.
+          type: object
+          properties:
+            url:
+              type: string
+              format: url
+              nullable: true
+            provided:
+              type: boolean
+              nullable: false
+          additionalProperties: false
+          required:
+            - provided
+        feature_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureType'
+        billing:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - monthly-prorated
+                - monthly-anniversary
+                - annual-anniversary
+            currency:
+              type: string
+              enum:
+                - usd
+          additionalProperties: false
+          required:
+            - type
+            - currency
+        integration:
+          type: object
+          properties:
+            provisioning:
+              $ref: '#/components/schemas/ProductProvisioning'
+            base_url:
+              type: string
+              format: url
+            sso_url:
+              type: string
+              format: url
+              nullable: true
+            version:
+              type: string
+              enum:
+                - v1
+            features:
+              $ref: '#/components/schemas/ProductIntegrationFeatures'
+          additionalProperties: false
+          required:
+            - provisioning
+            - base_url
+            - version
+            - features
+        tags:
+          $ref: '#/components/schemas/ProductTags'
+      additionalProperties: false
+      required:
+        - provider_id
+        - label
+        - name
+        - state
+        - listing
+        - logo_url
+        - tagline
+        - value_props
+        - images
+        - support_email
+        - terms
+        - documentation_url
+        - feature_types
+        - billing
+        - integration
+    Product:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        version:
+          type: integer
+          enum:
+            - 1
+        type:
+          type: string
+          enum:
+            - product
+        body:
+          $ref: '#/components/schemas/ProductBody'
+      additionalProperties: false
+      required:
+        - id
+        - version
+        - type
+        - body
+    CreateProduct:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/ProductBody'
+      additionalProperties: false
+      required:
+        - body
+    PlanResizeList:
+      type: array
+      description: >
+        Array of Plan IDs that this Plan can be resized to, if null all will be
+        assumed
+      items:
+        $ref: '#/components/schemas/ID'
+      nullable: true
+    PlanBody:
+      type: object
+      properties:
+        provider_id:
+          $ref: '#/components/schemas/ID'
+        product_id:
+          $ref: '#/components/schemas/ID'
+        name:
+          $ref: '#/components/schemas/Name'
+        label:
+          $ref: '#/components/schemas/Label'
+        state:
+          $ref: '#/components/schemas/PlanState'
+        resizable_to:
+          $ref: '#/components/schemas/PlanResizeList'
+        regions:
+          type: array
+          description: Array of Region IDs
+          items:
+            $ref: '#/components/schemas/ID'
+        features:
+          type: array
+          description: Array of Feature Values
+          items:
+            $ref: '#/components/schemas/FeatureValue'
+        trial_days:
+          type: integer
+          minimum: 0
+          description: |
+            The number of days a user gets as a free trial when subscribing to
+            this plan. Trials are valid only once per product; changing plans
+            or adding an additional subscription will not start a new trial.
+        cost:
+          type: integer
+          minimum: 0
+          description: |
+            Dollar value in cents.
+          additionalProperties: false
+      additionalProperties: false
+      required:
+        - provider_id
+        - product_id
+        - name
+        - label
+        - state
+        - regions
+        - features
+        - cost
+    PlanState:
+      type: string
+      enum:
+        - hidden
+        - available
+        - grandfathered
+        - unlisted
+    ExpandedPlanBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PlanBody'
+        - type: object
+          properties:
+            expanded_features:
+              type: array
+              description: >
+                An array of feature definitions for the plan, as defined on the
+                Product.
+              items:
+                $ref: '#/components/schemas/ExpandedFeature'
+            free:
+              type: boolean
+              description: >
+                A boolean flag that indicates if a plan is free or not based on
+                it's cost and features.
+            defaultCost:
+              type: integer
+              description: |
+                Plan cost using its default features plus base cost.
+            customizable:
+              type: boolean
+              description: >
+                A boolean flag that indicates if a plan has customizable
+                features.
+          additionalProperties: false
+          required:
+            - expanded_features
+            - free
+    ExpandedFeature:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/FeatureType'
+        - type: object
+          properties:
+            value_string:
+              type: string
+              description: >
+                The string value set for the feature on the plan, this should
+                only be used if the value property is null.
+            value:
+              $ref: '#/components/schemas/FeatureValueDetails'
+          additionalProperties: false
+          required:
+            - value_string
+            - value
+    Plan:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        version:
+          type: integer
+          enum:
+            - 1
+        type:
+          type: string
+          enum:
+            - plan
+        body:
+          $ref: '#/components/schemas/PlanBody'
+      additionalProperties: false
+      required:
+        - id
+        - version
+        - type
+        - body
+    ExpandedPlan:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        version:
+          type: integer
+          enum:
+            - 1
+        type:
+          type: string
+          enum:
+            - plan
+        body:
+          $ref: '#/components/schemas/ExpandedPlanBody'
+      additionalProperties: false
+      required:
+        - id
+        - version
+        - type
+        - body
+    CreatePlan:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/PlanBody'
+      additionalProperties: false
+      required:
+        - body
+    Error:
+      type: object
+      description: Unexpected error
+      properties:
+        type:
+          type: string
+          description: The error type
+        message:
+          type: array
+          description: Explanation of the errors
+          items:
+            type: string
+      additionalProperties: false
+      required:
+        - type
+        - message
+      x-go-type:
+        type: Error
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold
+    PriceFormula:
+      type: string
+      description: |
+        Describes how a feature cost should be calculated. An empty
+        string defaults to the normal price calculation using the value cost.
+        Formula uses Reverse Polish notation for statements. It supports
+        addition, subtraction and multiplication operations. Operations must be
+        grouped with parenthesis.
+        Number literals can be used for formulas. Eg: "(- feature-a#cost 500)"
+        will remove 5 dollars from the cost of feature a.
+        Multiplication operation supports either a cost multiplied by a
+        factor or a number multiplied by a factor.
+        In a plan formula the following keywords are available:
+          - `plan#base_cost` is the base cost of a plan in cents
+          - `plan#partial_cost` is the base cost plus its feature costs calculated
+            so far. Feature formulas are calculated in the order they are defined,
+            so features can refer to another feature values or the partial_cost of
+            the plan.
+          - `this-feature-label#multiply_factor` is the multiply_factor of this
+            feature as a float number.
+          - `another-feature-label#cost` is the cost of a feature matching the label
+            in cents.
+          - `another-feature-label#number` is the numeric value of a number feature
+        In a feature formula, plan base cost and total cost cannot be used
+      nullable: false
+    ExpandedProduct:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        version:
+          type: integer
+          enum:
+            - 1
+        type:
+          type: string
+          enum:
+            - product
+        body:
+          $ref: '#/components/schemas/ProductBody'
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpandedPlan'
+        provider:
+          $ref: '#/components/schemas/Provider'
+      additionalProperties: false
+      required:
+        - id
+        - version
+        - type
+        - body
+        - provider
+    Credentials:
+      type: object
+      description: |
+        Map of configuration variable names to values. Names must match
+        `^[a-zA-Z][a-zA-Z0-9_]{0,999}$`.
+      additionalProperties:
+        type: string
+    FeatureMap:
+      type: object
+      description: A map of feature labels to selected values for customizable features
+      additionalProperties: true
+      x-go-type:
+        type: FeatureMap
+        import:
+          package: github.com/manifoldco/go-manifold
+          alias: manifold

@@ -8,6 +8,13 @@ describe('swaggerToTS', () => {
     expect(swaggerToTS(spec, options)).toBe('declare namespace OpenAPI2 {}\n');
   });
 
+  it('is able to parse a Swagger 3 spec', () => {
+    const spec = { components: { schemas: {} } };
+    const options: Options = { swagger: 3 };
+
+    expect(swaggerToTS(spec, options)).toBe('declare namespace OpenAPI3 {}\n');
+  });
+
   it('errs on other options', () => {
     const spec = { definitions: {} };
     const options: Options = { swagger: 1 };
